@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.hrdym.exchangerates.MainActivity">
+
+    <Button
+        android:id="@+id/buttonCurrent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Current Exchange Rates"
+        tools:layout_editor_absoluteX="87dp"
+        tools:layout_editor_absoluteY="60dp" />
+
+    <Button
+        android:id="@+id/buttonHistoric"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Historical Exchange Rates"
+        tools:layout_editor_absoluteX="79dp"
+        tools:layout_editor_absoluteY="145dp" />
+</android.support.constraint.ConstraintLayout>
