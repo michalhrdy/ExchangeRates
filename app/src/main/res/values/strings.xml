@@ -2,4 +2,6 @@
     <string name="app_name">Exchange Rates</string>
     <string name="title_activity_current_rates">CurrentRatesActivity</string>
     <string name="add_filter">Add filter</string>
+    <string name="convert_from">Convert from:</string>
+    <string name="convert_to">Convert to:</string>
 </resources>

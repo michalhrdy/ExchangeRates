@@ -14,24 +14,24 @@
         android:text="@string/add_filter" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/textCurrencyFrom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Convert from:" />
+        android:text="@string/convert_from" />
 
-    <ExpandableListView
+    <Spinner
+        android:id="@+id/spinnerFrom"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-    </ExpandableListView>
+        android:layout_height="wrap_content" />
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/textCurrencyTo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Convert to:" />
+        android:text="@string/convert_to" />
 
-    <ExpandableListView
+    <Spinner
+        android:id="@+id/spinnerTo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
