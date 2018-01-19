@@ -22,6 +22,7 @@ public class CurrentRatesActivity extends AppCompatActivity {
     //
     String urlBaseString = new String("https://api.fixer.io/latest?base=");
     ArrayList<String> currencies;
+
     //
 
     public InputStream getInputStream(URL url) {
@@ -80,13 +81,14 @@ public class CurrentRatesActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 */
-
+/*
         Spinner spinner = (Spinner) findViewById(R.id.spinnerFrom);
-
-        //ArrayAdapter<String> adapter = new ArrayAdapter<String> (this, android.R.layout.simple_spinner_item, currencies);
-       // adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-       // spinner.setAdapter(adapter);
-
+        currencies.add("jedna");
+        currencies.add("dve");
+        ArrayAdapter<String> adapter = new ArrayAdapter<String> (this, android.R.layout.simple_spinner_item, currencies);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+*/
     }
 
 }
