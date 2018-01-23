@@ -41,8 +41,7 @@ public class CurrentRatesActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Add currency filter here", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Snackbar.make(view, "Add currency filter here", Snackbar.LENGTH_LONG).setAction("Action", null).show();
             }
         });
 
@@ -52,14 +51,15 @@ public class CurrentRatesActivity extends AppCompatActivity {
     public void callBackData(String[] result) {
 
         String[] test = result;
-            /*
+
+        /*
         Spinner spinner = (Spinner) findViewById(R.id.spinnerFrom);
         currencies.add("jedna");
         currencies.add("dve");
         ArrayAdapter<String> adapter = new ArrayAdapter<String> (this, android.R.layout.simple_spinner_item, currencies);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-            */
+         */
     }
 }
 
