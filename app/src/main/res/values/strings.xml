@@ -4,4 +4,6 @@
     <string name="add_filter">Add filter</string>
     <string name="convert_from">Convert from:</string>
     <string name="convert_to">Convert to:</string>
+    <string name="current_exchange_rates">Current Exchange Rates</string>
+    <string name="historical_exchange_rates">Historical Exchange Rates</string>
 </resources>

@@ -1,15 +1,18 @@
 package com.hrdym.exchangerates;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Xml;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -20,11 +23,13 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class CurrentRatesActivity extends AppCompatActivity {
 
-    //String urlBaseString = new String("https://api.fixer.io/latest?base=");
+    ArrayList<String> rawData;
+    ArrayList<String> ratesList;
     ArrayList<String> currencyList;
     private final static String url = "http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
 
@@ -41,7 +46,30 @@ public class CurrentRatesActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Add currency filter here", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                AlertDialog.Builder mBuilder = new AlertDialog.Builder(CurrentRatesActivity.this);
+                View mView = getLayoutInflater().inflate(R.layout.dialog_filter, null);
+
+                //Getting reference
+                Spinner mFromCurrency = (Spinner) mView.findViewById(R.id.spinnerFrom);
+                Spinner mToCurrency = (Spinner) mView.findViewById(R.id.spinnerTo);
+                Button mOKButton = (Button) mView.findViewById(R.id.buttonOk);
+
+                //Setting spinner values
+                ArrayAdapter<String> adapterCurrency = new ArrayAdapter<String>(mView.getContext(), R.layout.spinner_layout, currencyList);
+                adapterCurrency.setDropDownViewResource(R.layout.spinner_layout);
+                mFromCurrency.setAdapter(adapterCurrency);
+                mToCurrency.setAdapter(adapterCurrency);
+
+                mOKButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Toast.makeText(CurrentRatesActivity.this, "Filter Added", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                mBuilder.setView(mView);
+                AlertDialog mDialog = mBuilder.create();
+                mDialog.show();
             }
         });
 
@@ -50,16 +78,10 @@ public class CurrentRatesActivity extends AppCompatActivity {
 
     public void callBackData(String[] result) {
 
-        String[] test = result;
+        rawData = new ArrayList<String>(Arrays.asList(result));
+        currencyList = new ArrayList<String>(rawData.subList(0, (rawData.size()/2)));
+        ratesList = new ArrayList<String>(rawData.subList(rawData.size()/2, rawData.size()));
 
-        /*
-        Spinner spinner = (Spinner) findViewById(R.id.spinnerFrom);
-        currencies.add("jedna");
-        currencies.add("dve");
-        ArrayAdapter<String> adapter = new ArrayAdapter<String> (this, android.R.layout.simple_spinner_item, currencies);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-         */
     }
 }
 

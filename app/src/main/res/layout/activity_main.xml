@@ -19,11 +19,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="84dp" />
+
         <Button
             android:id="@+id/buttonCurrent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Current Exchange Rates"
+            android:background="@color/colorAccent"
+            android:text="@string/current_exchange_rates"
+            android:textColor="@android:color/white"
             tools:layout_editor_absoluteX="87dp"
             tools:layout_editor_absoluteY="60dp" />
 
@@ -33,9 +39,12 @@
 
         <Button
             android:id="@+id/buttonHistoric"
+            style="@android:style/Widget.Holo.Light.Button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Historical Exchange Rates"
+            android:background="@color/colorAccent"
+            android:text="@string/historical_exchange_rates"
+            android:textColor="@android:color/white"
             android:visibility="visible"
             tools:layout_editor_absoluteX="79dp"
             tools:layout_editor_absoluteY="145dp" />
