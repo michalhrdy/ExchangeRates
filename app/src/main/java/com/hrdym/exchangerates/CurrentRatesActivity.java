@@ -25,6 +25,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 
 public class CurrentRatesActivity extends AppCompatActivity {
 
@@ -38,9 +39,46 @@ public class CurrentRatesActivity extends AppCompatActivity {
     Spinner mFromCurrency;
     Spinner mToCurrency;
     Button mOKButton;
+    SharedPreferences sharedpreferences;
+    SharedPreferences.Editor editor;
 
     public CurrentRatesActivity() throws MalformedURLException {
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        for(int i=0; i<content.getChildCount(); i++) {
+
+            View child = content.getChildAt(i);
+            TextView from = child.findViewById(R.id.itemTextFrom);
+            TextView to = child.findViewById(R.id.itemTextTo);
+
+            editor.putString(Integer.toString(i), from.getText()+" "+to.getText());
+        }
+        editor.commit();
+    }
+
+    @Override
+    protected void onStart(){
+        super.onStart();
+
+        Map<String, ?> filters = sharedpreferences.getAll();
+        int nFilters = filters.size();
+
+        for(int i=0; i<nFilters; i++) {
+
+            String currencies = (String) filters.get(Integer.toString(i));
+
+            String[] splited = currencies.split("\\s+");
+
+            AddFilter(splited[0],splited[1]);
+        }
+
+    }
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,9 +86,9 @@ public class CurrentRatesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_current_rates);
         content = (LinearLayout) findViewById(R.id.currentContent);
 
-        //loading of saved filters
-        //SharedPreferences sharedpreferences = getSharedPreferences("filters", Context.MODE_PRIVATE);
-        //SharedPreferences.Editor editor = sharedpreferences.edit();
+        //loading of sharedprefs
+        sharedpreferences = getSharedPreferences("filters", Context.MODE_PRIVATE);
+        editor = sharedpreferences.edit();
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.buttonAddFilter);
@@ -82,12 +120,16 @@ public class CurrentRatesActivity extends AppCompatActivity {
 
                         TextView currencyFrom = rowView.findViewById(R.id.itemTextFrom);
                         TextView currencyTo = rowView.findViewById(R.id.itemTextTo);
+                        TextView currencyVal = rowView.findViewById(R.id.unitValue);
+
                         float currency_value = getCurrencyValue(mFromCurrency.getSelectedItemPosition(),mToCurrency.getSelectedItemPosition());
 
-                        currencyFrom.setText("1 "+itemFrom.getText());
-                        currencyTo.setText(String.format("%.3f", currency_value)+" "+itemTo.getText());
+                        currencyFrom.setText(itemFrom.getText());
+                        currencyTo.setText(itemTo.getText());
+                        currencyVal.setText(String.format("%.3f", currency_value));
 
                         content.addView(rowView, 0);
+
                         Toast.makeText(CurrentRatesActivity.this, "Filter Added", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -99,6 +141,29 @@ public class CurrentRatesActivity extends AppCompatActivity {
         });
 
         new GetRatesDataTask(this, url).execute();
+    }
+
+    public void AddFilter(String from, String to)
+    {
+        View rowView = getLayoutInflater().inflate(R.layout.converse_item, null);
+
+        TextView currencyFrom = rowView.findViewById(R.id.itemTextFrom);
+        TextView currencyTo = rowView.findViewById(R.id.itemTextTo);
+        TextView currencyVal = rowView.findViewById(R.id.unitValue);
+
+
+        //FIX THIS!!!
+        //int indfrom = currencyList.indexOf(from);
+        //int indto = currencyList.indexOf(to);
+
+        //float currency_value = getCurrencyValue(0,1);
+        float currency_value = 2;
+
+        currencyFrom.setText(from);
+        currencyTo.setText(to);
+        currencyVal.setText(String.format("%.3f", currency_value));
+
+        content.addView(rowView, 0);
     }
 
     public void onDeleteFilter(View v) {
