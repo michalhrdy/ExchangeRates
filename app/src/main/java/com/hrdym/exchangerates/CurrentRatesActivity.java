@@ -9,7 +9,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -21,25 +23,34 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class CurrentRatesActivity extends AppCompatActivity {
 
+    //Data strings
     ArrayList<String> rawData;
     ArrayList<String> ratesList;
     ArrayList<String> currencyList;
     private final static String url = "http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
+    //Views and layouts
+    private LinearLayout content;
+    Spinner mFromCurrency;
+    Spinner mToCurrency;
+    Button mOKButton;
 
     public CurrentRatesActivity() throws MalformedURLException {
     }
-    //
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_current_rates);
+        content = (LinearLayout) findViewById(R.id.currentContent);
+
+        //add loading of saved filters
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.buttonAddFilter);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -49,9 +60,9 @@ public class CurrentRatesActivity extends AppCompatActivity {
                 View mView = getLayoutInflater().inflate(R.layout.dialog_filter, null);
 
                 //Getting reference
-                Spinner mFromCurrency = (Spinner) mView.findViewById(R.id.spinnerFrom);
-                Spinner mToCurrency = (Spinner) mView.findViewById(R.id.spinnerTo);
-                Button mOKButton = (Button) mView.findViewById(R.id.buttonOk);
+                mFromCurrency = (Spinner) mView.findViewById(R.id.spinnerFrom);
+                mToCurrency = (Spinner) mView.findViewById(R.id.spinnerTo);
+                mOKButton = (Button) mView.findViewById(R.id.buttonOk);
 
                 //Setting spinner values
                 ArrayAdapter<String> adapterCurrency = new ArrayAdapter<String>(mView.getContext(), R.layout.spinner_layout, currencyList);
@@ -59,9 +70,23 @@ public class CurrentRatesActivity extends AppCompatActivity {
                 mFromCurrency.setAdapter(adapterCurrency);
                 mToCurrency.setAdapter(adapterCurrency);
 
+                //Adding filter by button
                 mOKButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        View rowView = getLayoutInflater().inflate(R.layout.converse_item, null);
+
+                        TextView itemFrom = (TextView) mFromCurrency.getSelectedView();
+                        TextView itemTo = (TextView) mToCurrency.getSelectedView();
+
+                        TextView currencyFrom = rowView.findViewById(R.id.itemTextFrom);
+                        TextView currencyTo = rowView.findViewById(R.id.itemTextTo);
+                        float currency_value = getCurrencyValue(mFromCurrency.getSelectedItemPosition(),mToCurrency.getSelectedItemPosition());
+
+                        currencyFrom.setText("1 "+itemFrom.getText());
+                        currencyTo.setText(String.format("%.3f", currency_value)+" "+itemTo.getText());
+
+                        content.addView(rowView, 0);
                         Toast.makeText(CurrentRatesActivity.this, "Filter Added", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -75,12 +100,18 @@ public class CurrentRatesActivity extends AppCompatActivity {
         new GetRatesDataTask(this, url).execute();
     }
 
-    public void callBackData(String[] result) {
+    public void onDeleteFilter(View v) {
+        content.removeView((View) v.getParent());
+    }
 
+    public void callBackData(String[] result) {
         rawData = new ArrayList<String>(Arrays.asList(result));
         currencyList = new ArrayList<String>(rawData.subList(0, (rawData.size()/2)));
         ratesList = new ArrayList<String>(rawData.subList(rawData.size()/2, rawData.size()));
+    }
 
+    public float getCurrencyValue(int indexFrom, int indexTo) {
+        return Float.parseFloat(ratesList.get(indexTo))/Float.parseFloat(ratesList.get(indexFrom));
     }
 }
 
