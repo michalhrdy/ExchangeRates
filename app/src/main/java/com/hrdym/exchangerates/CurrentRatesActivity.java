@@ -2,6 +2,8 @@ package com.hrdym.exchangerates;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -15,18 +17,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class CurrentRatesActivity extends AppCompatActivity {
 
@@ -50,7 +48,10 @@ public class CurrentRatesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_current_rates);
         content = (LinearLayout) findViewById(R.id.currentContent);
 
-        //add loading of saved filters
+        //loading of saved filters
+        //SharedPreferences sharedpreferences = getSharedPreferences("filters", Context.MODE_PRIVATE);
+        //SharedPreferences.Editor editor = sharedpreferences.edit();
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.buttonAddFilter);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -106,6 +107,9 @@ public class CurrentRatesActivity extends AppCompatActivity {
 
     public void callBackData(String[] result) {
         rawData = new ArrayList<String>(Arrays.asList(result));
+        rawData.add(0,"EUR");
+        rawData.add((rawData.size()/2)+1, "1.0");
+
         currencyList = new ArrayList<String>(rawData.subList(0, (rawData.size()/2)));
         ratesList = new ArrayList<String>(rawData.subList(rawData.size()/2, rawData.size()));
     }
