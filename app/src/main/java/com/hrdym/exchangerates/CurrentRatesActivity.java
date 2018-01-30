@@ -4,6 +4,8 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -25,7 +27,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 public class CurrentRatesActivity extends AppCompatActivity {
 
@@ -39,15 +43,17 @@ public class CurrentRatesActivity extends AppCompatActivity {
     Spinner mFromCurrency;
     Spinner mToCurrency;
     Button mOKButton;
-    SharedPreferences sharedpreferences;
-    SharedPreferences.Editor editor;
+    SharedPreferences filterpreferences;
+    SharedPreferences.Editor filtereditor;
+    SharedPreferences currencypreferences;
+    SharedPreferences.Editor currencyeditor;
 
     public CurrentRatesActivity() throws MalformedURLException {
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
+    public void saveFilters() {
+
+        filtereditor.clear();
 
         for(int i=0; i<content.getChildCount(); i++) {
 
@@ -55,30 +61,44 @@ public class CurrentRatesActivity extends AppCompatActivity {
             TextView from = child.findViewById(R.id.itemTextFrom);
             TextView to = child.findViewById(R.id.itemTextTo);
 
-            editor.putString(Integer.toString(i), from.getText()+" "+to.getText());
+            filtereditor.putString(Integer.toString(i), from.getText()+" "+to.getText());
         }
-        editor.commit();
+        filtereditor.commit();
     }
 
-    @Override
-    protected void onStart(){
-        super.onStart();
+    public void saveCurrency(){
 
-        Map<String, ?> filters = sharedpreferences.getAll();
+        currencyeditor.clear();
+
+        for(int i=0; i<currencyList.size(); i++) {
+            currencyeditor.putString(currencyList.get(i),ratesList.get(i));
+        }
+        currencyeditor.commit();
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        saveFilters();
+        saveCurrency();
+    }
+
+    public void addSavedFilters(){
+
+        Map<String, ?> filters = filterpreferences.getAll();
         int nFilters = filters.size();
 
         for(int i=0; i<nFilters; i++) {
 
             String currencies = (String) filters.get(Integer.toString(i));
 
-            String[] splited = currencies.split("\\s+");
+            String[] splitted = currencies.split("\\s+");
 
-            AddFilter(splited[0],splited[1]);
+            AddFilter(splitted[0],splitted[1]);
         }
-
     }
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,10 +106,11 @@ public class CurrentRatesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_current_rates);
         content = (LinearLayout) findViewById(R.id.currentContent);
 
-        //loading of sharedprefs
-        sharedpreferences = getSharedPreferences("filters", Context.MODE_PRIVATE);
-        editor = sharedpreferences.edit();
-
+        //loading of preferences
+        filterpreferences = getSharedPreferences("filters", Context.MODE_PRIVATE);
+        filtereditor = filterpreferences.edit();
+        currencypreferences = getSharedPreferences("currency", Context.MODE_PRIVATE);
+        currencyeditor = currencypreferences.edit();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.buttonAddFilter);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -151,13 +172,10 @@ public class CurrentRatesActivity extends AppCompatActivity {
         TextView currencyTo = rowView.findViewById(R.id.itemTextTo);
         TextView currencyVal = rowView.findViewById(R.id.unitValue);
 
+        int index_from = currencyList.indexOf(from);
+        int index_to = currencyList.indexOf(to);
 
-        //FIX THIS!!!
-        //int indfrom = currencyList.indexOf(from);
-        //int indto = currencyList.indexOf(to);
-
-        //float currency_value = getCurrencyValue(0,1);
-        float currency_value = 2;
+        float currency_value = getCurrencyValue(index_from,index_to);
 
         currencyFrom.setText(from);
         currencyTo.setText(to);
@@ -171,12 +189,20 @@ public class CurrentRatesActivity extends AppCompatActivity {
     }
 
     public void callBackData(String[] result) {
-        rawData = new ArrayList<String>(Arrays.asList(result));
-        rawData.add(0,"EUR");
-        rawData.add((rawData.size()/2)+1, "1.0");
+        if (result == null){
+            Map<String, ?> currencymap = currencypreferences.getAll();
 
-        currencyList = new ArrayList<String>(rawData.subList(0, (rawData.size()/2)));
-        ratesList = new ArrayList<String>(rawData.subList(rawData.size()/2, rawData.size()));
+            currencyList = new ArrayList<String>(currencymap.keySet());
+            ratesList = new ArrayList<String>((Collection<String>)currencymap.values());
+        }
+        else {
+            rawData = new ArrayList<String>(Arrays.asList(result));
+            rawData.add(0, "EUR");
+            rawData.add((rawData.size() / 2) + 1, "1.0");
+
+            currencyList = new ArrayList<String>(rawData.subList(0, (rawData.size() / 2)));
+            ratesList = new ArrayList<String>(rawData.subList(rawData.size() / 2, rawData.size()));
+        }
     }
 
     public float getCurrencyValue(int indexFrom, int indexTo) {
@@ -208,6 +234,7 @@ class GetRatesDataTask extends AsyncTask<String[], Void, String[]> {
     @Override
     protected String[] doInBackground(String[]... params) {
         try {
+            if(!isOnline()) return null;
             URL url = new URL(this.url);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setReadTimeout(10000);
@@ -225,7 +252,6 @@ class GetRatesDataTask extends AsyncTask<String[], Void, String[]> {
             String[] result = parseXML(myParser);
             stream.close();
             return result;
-
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -275,10 +301,18 @@ class GetRatesDataTask extends AsyncTask<String[], Void, String[]> {
         }
     }
 
+    public boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
+
     @Override
     protected void onPostExecute(String[] result) {
         //call back data to main thread
-        pDialog.dismiss();
         activity.callBackData(result);
+        activity.addSavedFilters();
+        pDialog.dismiss();
     }
 }
